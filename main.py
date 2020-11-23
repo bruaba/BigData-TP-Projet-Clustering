@@ -1,29 +1,56 @@
+import sys
 from pyspark.ml.clustering import KMeans
 from pyspark.ml.evaluation import ClusteringEvaluator
+from pyspark.sql.types import *
 from pyspark.sql import SparkSession
 from pyspark import SparkContext
 
+
+#start Spark Session
 spark = SparkSession \
 		.builder \
-		.appName("PythonSparkProjet") \
+		.appName("Flag") \
 		.getOrCreate()
 
-# Chargement de flag
-sc = SparkContext("local")
-dataset = sc.textFile("flag.csv")
-parsedData = dataset.map(lambda line: array([ float(x) for x in line.split(",")]))
+print('************')
+print('Python version: {}'.format(sys.version))
+print('Spark version: {}'.format(spark.version))
+print('************')
 
-clusters = KMeans.train(parsedData, 2, maxIterations = 10, initializationMode = "random")
 
-def error(point):
-	center = clusters.centers[clusters.predict(point)]
-	return sqrt( sum( [x**2 for x in (point - center)]))
+#schema
+schema = StructType([
+	StructField("BARS",IntegerType()),
+	StructField("STRIPES",IntegerType()),
+	StructField("COLOURS",IntegerType()),
+	StructField("RED",IntegerType()),
+	StructField("GREEN",IntegerType()),
+	StructField("BLUE",IntegerType()),
+	StructField("GOLD",IntegerType()),
+	StructField("WHITE",IntegerType()),
+	StructField("BLACK",IntegerType()),
+	StructField("ORANGE",IntegerType()),
+	StructField("MAINHUE",IntegerType()),
+	StructField("CIRCLES",IntegerType()),
+	StructField("CROSSES",IntegerType()),
+	StructField("SALTIRES",IntegerType()),
+	StructField("QUARTERS",IntegerType()),
+	StructField("SUNSTARS",IntegerType()),
+	StructField("CRESCENT",IntegerType()),
+	StructField("TRIANGLE",IntegerType()),
+	StructField("ICON",IntegerType()),
+	StructField("ANIMATE",IntegerType()),
+	StructField("TEXT",IntegerType()),
+	StructField("BOTRIGHT",IntegerType())
+	])
 
-WSSSE = parsedData.map(lambda point: error(point)).reduce(lambda x, y: x + y)
-print("Within Set Sum of Squared Error = " + str(WSSSE))
+
+# Chargement de flag.cqsv
+
+dataset = spark.read.csv("flag.csv", header = 'true', schema = schema)
 
 # Save and load model
-clusters.save(sc, "model")
+#clusters.save(sc, "model")
 
 #Affichage de flag.csv
 dataset.show()
