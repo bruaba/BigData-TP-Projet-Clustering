@@ -61,7 +61,7 @@ dataset.printSchema()
 
 #A feature transformer that merges multiple columns into a vector column.
 vecAssembler = VectorAssembler(
-		inputCol = ['BARS',
+		inputCols = ['BARS',
 		'STRIPES',
 		'COLOURS',
 		'RED',
@@ -103,3 +103,55 @@ print("Centers", centers)
 flag_for_viz = flag_with_clusters.toPandas()
 
 # Vizualize
+# Colors code k-means results, cluster numbers
+colors = {0:'red', 1:'green', 2:'blue', 3:'orange'}
+
+fig = plt.figure().gca(projection = '3d')
+fig.scatter(flag_for_viz.BARS,
+             flag_for_viz.STRIPES,
+             flag_for_viz.RED,
+             c = flag_for_viz.prediction.map(colors),
+             marker = 's')
+
+fig.scatter(flag_for_viz.GREEN,
+             flag_for_viz.BLUE,
+             flag_for_viz.GOLD,
+             c = flag_for_viz.prediction.map(colors),
+             marker = 's')
+
+fig.scatter(flag_for_viz.WHITE,
+             flag_for_viz.BLACK,
+             flag_for_viz.ORANGE,
+             c = flag_for_viz.prediction.map(colors),
+             marker = 's')
+
+fig.scatter(flag_for_viz.MAINHUE,
+             flag_for_viz.CIRCLES,
+             flag_for_viz.CROSSES,
+             c = flag_for_viz.prediction.map(colors),
+             marker = 's')
+
+fig.scatter(flag_for_viz.SALTIRES,
+             flag_for_viz.QUARTERS,
+             flag_for_viz.SUNSTARS,
+             c = flag_for_viz.prediction.map(colors),
+             marker = 's')
+
+
+fig.scatter(flag_for_viz.CRESCENT,
+             flag_for_viz.TRIANGLE,
+             flag_for_viz.ICON,
+             c = flag_for_viz.prediction.map(colors),
+             marker = 's')
+
+
+fig.scatter(flag_for_viz.ANIMATE,
+             flag_for_viz.TEXT,
+             flag_for_viz.BOTRIGHT,
+             c = flag_for_viz.prediction.map(colors),
+             marker = 's')
+
+fig.set_xlabel('BARS')
+fig.set_ylabel('STRIPES')
+fig.set_zlabel('BLUE')
+plt.show()
