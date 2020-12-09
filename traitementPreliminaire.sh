@@ -5,7 +5,7 @@ awk 'BEGIN{
 		FS=OFS=","
 	} 
 	{
-		n = $2
+		n = $1 "," $2
 
 		for (i = 8; i <= (NF); i++) {
 			n = n ","$i

@@ -23,6 +23,7 @@ print('************')
 
 #schema
 schema = StructType([
+	StructField("COUNTRY",StringType()),
 	StructField("LANDMASS",IntegerType()),
 	StructField("BARS",IntegerType()),
 	StructField("STRIPES",IntegerType()),
@@ -90,7 +91,7 @@ vecAssembler = VectorAssembler(
 flag_with_features = vecAssembler.transform(dataset)
 
 # Do K-means
-k = 5
+k = 6
 
 kmeans_algo = KMeans().setK(k).setSeed(1).setFeaturesCol("features")
 model = kmeans_algo.fit(flag_with_features)
@@ -106,6 +107,9 @@ flag_for_viz = flag_with_clusters.toPandas()
 
 # Vizualize
 # Marker styles are calculated from LANDMASS
+print(flag_for_viz['COUNTRY'] )
+
+
 NAmericaI = flag_for_viz['LANDMASS'] == 1
 NAmerica = flag_for_viz [ NAmericaI ]
 SAmericaI = flag_for_viz['LANDMASS'] == 2
@@ -124,10 +128,10 @@ Oceania = flag_for_viz [ OceaniaI ]
 
 
 
-# Dimenstion reduction. From 4D to 3D
+# Dimenstion reduction. From 22D to 3D
 # by PCA method
 datamatrix =  RowMatrix(dataset.select([
-	'BARS',
+		'BARS',
 		'STRIPES',
 		'COLOURS',
 		'RED',
@@ -171,7 +175,7 @@ new_Z = pd.DataFrame(
 
 # Vizualize with PCA, 3 components
 # Colors code k-means results, cluster numbers
-colors = {0:'red', 1:'green', 2:'blue', 3:'orange', 4:'purple', 5:'yellow' }
+colors = {0:'green', 1:'yellow', 2:'red', 3:'blue', 4:'purple', 5:'black' }
 
 fig = plt.figure().gca(projection='3d')
 fig.scatter(new_X [NAmericaI],
@@ -207,7 +211,103 @@ fig.scatter(new_X [OceaniaI],
             marker = 's')
 
 
+for i in range( len(flag_for_viz['COUNTRY'])): 
+	fig.text (float(new_X.iloc[i]), float(new_Y.iloc[i]), float(new_Z.iloc[i]), flag_for_viz['COUNTRY'].iloc[i])
+
 fig.set_xlabel('Component 1')
 fig.set_ylabel('Component 2')
 fig.set_zlabel('Component 3')
-plt.show()
+plt.savefig("plot_3D.png")
+
+
+
+#2D
+
+# Dimenstion reduction. From 22D to 2D
+# by PCA method
+datamatrix =  RowMatrix(dataset.select([
+		'BARS',
+		'STRIPES',
+		'COLOURS',
+		'RED',
+		'GREEN',
+		'BLUE',
+		'GOLD',
+		'WHITE',
+		'BLACK',
+		'ORANGE',
+		'MAINHUE',
+		'CIRCLES',
+		'CROSSES',
+		'SALTIRES',
+		'QUARTERS',
+		'SUNSTARS',
+		'CRESCENT',
+		'TRIANGLE',
+		'ICON',
+		'ANIMATE',
+		'TEXT',
+		'BOTRIGHT'
+
+	]).rdd.map(list))
+
+# Compute the top 2 principal components. The "best" hyperplane.
+pc = datamatrix.computePrincipalComponents(2)
+print ("***** 2 Principal components *****")
+print(pc)
+
+# project data
+projected = datamatrix.multiply(pc)
+new_X = pd.DataFrame(
+    projected.rows.map(lambda x: x.values[0]).collect()
+)
+new_Y = pd.DataFrame(
+    projected.rows.map(lambda x: x.values[1]).collect()
+)
+# Vizualize with PCA, 2 components
+# Colors code k-means results, cluster numbers
+colors = {0:'green', 1:'yellow', 2:'red', 3:'blue', 4:'purple', 5:'black' }
+
+fig = plt.figure().gca()
+fig.scatter(new_X [NAmericaI],
+            new_Y [NAmericaI],
+            
+            c = NAmerica.prediction.map(colors),
+            marker = 's')
+fig.scatter(new_X [SAmericaI],
+            new_Y [SAmericaI],
+            
+            c = SAmerica.prediction.map(colors),
+            marker = 's')
+
+fig.scatter(new_X [EuropeI],
+            new_Y [EuropeI],
+                       c = Europe.prediction.map(colors),
+            marker = 's')
+fig.scatter(new_X [AfricaI],
+            new_Y [AfricaI],
+                       c = Africa.prediction.map(colors),
+            marker = 's')
+fig.scatter(new_X [AsiaI],
+            new_Y [AsiaI],
+                     c = Asia.prediction.map(colors),
+            marker = 's')
+fig.scatter(new_X [OceaniaI],
+            new_Y [OceaniaI],
+                        c = Oceania.prediction.map(colors),
+            marker = 's')
+
+for i in range( len(flag_for_viz['COUNTRY'])): 
+	fig.text (float(new_X.iloc[i]), float(new_Y.iloc[i]), flag_for_viz['COUNTRY'].iloc[i])
+
+
+fig.set_xlabel('Component 1')
+fig.set_ylabel('Component 2')
+plt.savefig("plot_2D.png")
+
+
+
+"""
+alias python="python3"
+export PYSPARK_PYTHON=python3
+"""
