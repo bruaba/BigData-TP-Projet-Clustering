@@ -1,2 +1,0 @@
-# BigData-TP-Projet-Clustering
-
